@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'screens/main_screen.dart';
-import 'screens/splash_screen.dart';
-import 'home_screen.dart';
 import 'services/supabase_service.dart';
 
 Future<void> main() async {
@@ -25,17 +23,7 @@ class MyApp extends StatelessWidget {
     final textTheme = GoogleFonts.poppinsTextTheme();
     return MaterialApp(
       title: 'Live Bus Tracker',
-      home: Builder(
-        builder: (context) => SplashScreen(
-          onComplete: () {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => const HomeScreen(),
-              ),
-            );
-          },
-        ),
-      ),
+      home: const MainScreen(),
       theme: ThemeData(
         useMaterial3: true,
         textTheme: textTheme.apply(

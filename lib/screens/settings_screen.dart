@@ -92,7 +92,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             'About',
             [
               ListTile(
-                title: const Text('Powered by snake domz'),
+                title: const Text('Powered by domz'),
                 subtitle: const Text('1.0.0'),
                 leading: const Icon(Icons.info_outline),
               ),

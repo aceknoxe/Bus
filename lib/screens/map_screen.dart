@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../models/bus_stop.dart';
 import 'bus_details_screen.dart';
+import '../widgets/location_search_field.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -12,6 +14,8 @@ class _MapScreenState extends State<MapScreen> {
   final _startController = TextEditingController();
   final _endController = TextEditingController();
   bool _showResults = false;
+  BusStop? _startLocation;
+  BusStop? _endLocation;
 
   @override
   void dispose() {
@@ -21,9 +25,24 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _searchBuses() {
-    setState(() => _showResults = true);
+    if (_startLocation != null && _endLocation != null) {
+      setState(() => _showResults = true);
+    }
   }
 
+  void _handleStartLocationSelected(BusStop stop) {
+    setState(() {
+      _startLocation = stop;
+      _showResults = false;
+    });
+  }
+
+  void _handleEndLocationSelected(BusStop stop) {
+    setState(() {
+      _endLocation = stop;
+      _showResults = false;
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -39,124 +58,61 @@ class _MapScreenState extends State<MapScreen> {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                TextField(
+                LocationSearchField(
                   controller: _startController,
-                  decoration: InputDecoration(
-                    hintText: 'Enter starting point',
-                    prefixIcon: const Icon(Icons.location_on_outlined),
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.my_location),
-                      onPressed: () {
-                        // TODO: Get current location
-                      },
-                    ),
-                    filled: true,
-                    fillColor: Theme.of(context).colorScheme.surfaceVariant,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _endController,
-                  decoration: InputDecoration(
-                    hintText: 'Enter destination',
-                    prefixIcon: const Icon(Icons.location_on),
-                    filled: true,
-                    fillColor: Theme.of(context).colorScheme.surfaceVariant,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
+                  hintText: 'Enter starting point',
+                  onLocationSelected: _handleStartLocationSelected,
                 ),
                 const SizedBox(height: 16),
+                LocationSearchField(
+                  controller: _endController,
+                  hintText: 'Enter destination',
+                  onLocationSelected: _handleEndLocationSelected,
+                ),
+                const SizedBox(height: 16),
+                const SizedBox(height: 8),
                 SizedBox(
                   width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: _searchBuses,
-                    icon: const Icon(Icons.search),
-                    label: const Text('Find Buses'),
+                  child: ElevatedButton(
+                    onPressed: (_startLocation != null && _endLocation != null) ? _searchBuses : null,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const Text(
+                      'Search Buses',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ),
               ],
             ),
           ),
         ),
-
         // Results Section
-        if (_showResults) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                Text(
-                  'Available Buses',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const Spacer(),
-                TextButton.icon(
-                  onPressed: () {
-                    setState(() => _showResults = false);
-                  },
-                  icon: const Icon(Icons.clear),
-                  label: const Text('Clear'),
-                ),
-              ],
-            ),
-          ),
+        if (_showResults)
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: 5, // Demo data
+              itemCount: 3, // Sample data
               itemBuilder: (context, index) {
                 return Card(
-                  margin: const EdgeInsets.only(bottom: 8),
+                  margin: const EdgeInsets.only(bottom: 16),
                   child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      child: Text(
-                        'B${index + 1}',
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    title: Text('Bus ${index + 1}'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Route: R${index + 1}'),
-                        Text(
-                          'Currently at: Stop ${index + 3}',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                    trailing: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '${5 + index} mins',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        Text(
-                          'away',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
+                    title: Text('Route ${index + 1}'),
+                    subtitle: const Text('Via: Stop A, Stop B, Stop C'),
+                    trailing: const Text('30 mins'),
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => BusDetailsScreen(
-                            busId: 'B${index + 1}',
-                            routeName: 'R${index + 1}',
+                            busId: 'Bus${index + 1}',
+                            routeName: 'Route ${index + 1}',
                           ),
                         ),
                       );
@@ -166,43 +122,6 @@ class _MapScreenState extends State<MapScreen> {
               },
             ),
           ),
-        ] else ...[
-          // Recent Searches
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Recent Searches',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: 5,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          leading: const Icon(Icons.history),
-                          title: Text('Search ${index + 1}'),
-                          subtitle: Text(
-                              'From Location ${index + 1} to Destination ${index + 1}'),
-                          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                          onTap: () {
-                            // TODO: Reuse search
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
       ],
     );
   }

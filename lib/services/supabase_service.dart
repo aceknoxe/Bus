@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'bus_service.dart';
 import 'search_service.dart';
 import 'realtime_service.dart';
+import 'location_service.dart';
 
 class SupabaseService {
   static SupabaseService? _instance;
@@ -10,6 +11,7 @@ class SupabaseService {
   late final BusService busService;
   late final SearchService searchService;
   late final RealtimeService realtimeService;
+  late final LocationService locationService;
 
   SupabaseService._();
 
@@ -18,6 +20,7 @@ class SupabaseService {
     busService = BusService(_client);
     realtimeService = RealtimeService(_client);
     searchService = SearchService(_client);
+    locationService = LocationService(_client);
   }
 
   static Future<SupabaseService> initialize() async {
